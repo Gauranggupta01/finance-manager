@@ -40,6 +40,13 @@ function AddTransaction() {
   const [loading, setLoading] =
     useState(false);
 
+  const [categoryLoading,
+    setCategoryLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
   // FETCH CATEGORIES
 
   useEffect(() => {
@@ -52,8 +59,21 @@ function AddTransaction() {
 
     try {
 
+      setCategoryLoading(true);
+
+      setError("");
+
       const username =
         localStorage.getItem("username");
+
+      if (!username) {
+
+        setError("User not found");
+
+        setCategoryLoading(false);
+
+        return;
+      }
 
       const response =
         await API.get(
@@ -65,7 +85,18 @@ function AddTransaction() {
         response.data
       );
 
-      setCategories(response.data);
+      if (
+        Array.isArray(response.data)
+      ) {
+
+        setCategories(
+          response.data
+        );
+
+      } else {
+
+        setCategories([]);
+      }
 
     } catch (error) {
 
@@ -74,9 +105,15 @@ function AddTransaction() {
         error
       );
 
-      alert(
+      setCategories([]);
+
+      setError(
         "Unable to load categories"
       );
+
+    } finally {
+
+      setCategoryLoading(false);
     }
   };
 
@@ -84,7 +121,8 @@ function AddTransaction() {
 
   const handleChange = (e) => {
 
-    const { name, value } = e.target;
+    const { name, value } =
+      e.target;
 
     // RESET CATEGORY WHEN TYPE CHANGES
 
@@ -116,9 +154,9 @@ function AddTransaction() {
 
     e.preventDefault();
 
-    setLoading(true);
-
     try {
+
+      setLoading(true);
 
       const username =
         localStorage.getItem("username");
@@ -129,6 +167,11 @@ function AddTransaction() {
 
         username,
       };
+
+      console.log(
+        "SUBMIT:",
+        updatedData
+      );
 
       await API.post(
 
@@ -173,11 +216,11 @@ function AddTransaction() {
   // FILTER CATEGORIES
 
   const filteredCategories =
-    categories.filter(
+    (categories || []).filter(
 
       (cat) =>
 
-        cat.type
+        cat?.type
           ?.trim()
           ?.toUpperCase()
 
@@ -188,23 +231,65 @@ function AddTransaction() {
           ?.toUpperCase()
     );
 
+  if (categoryLoading) {
+
+    return (
+
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-blue-950 to-black">
+
+        <h1 className="text-4xl font-bold text-white animate-pulse">
+
+          Loading Categories...
+
+        </h1>
+
+      </div>
+    );
+  }
+
+  if (error) {
+
+    return (
+
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-blue-950 to-black px-6">
+
+        <div className="bg-red-500/20 border border-red-400 text-white p-10 rounded-3xl shadow-2xl text-center">
+
+          <h1 className="text-4xl font-bold mb-4">
+
+            Error
+
+          </h1>
+
+          <p className="text-xl">
+
+            {error}
+
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
+
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 flex justify-center items-center p-10">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 flex justify-center items-center p-4 md:p-10">
 
-      <div className="backdrop-blur-lg bg-white/70 border border-white/30 p-10 rounded-3xl shadow-2xl w-full max-w-2xl">
+      <div className="backdrop-blur-lg bg-white/70 border border-white/30 p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-2xl">
 
         {/* HEADER */}
 
         <div className="text-center mb-12">
 
-          <h1 className="text-7xl font-extrabold text-gray-800 mb-4">
+          <h1 className="text-4xl md:text-7xl font-extrabold text-gray-800 mb-4">
 
             Add Transaction
 
           </h1>
 
-          <p className="text-2xl text-gray-600">
+          <p className="text-lg md:text-2xl text-gray-600">
 
             Track your income and expenses
 
@@ -233,7 +318,7 @@ function AddTransaction() {
               placeholder="Enter Amount"
               value={formData.amount}
               onChange={handleChange}
-              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-green-300 text-2xl"
+              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-green-300 text-xl md:text-2xl"
               required
             />
 
@@ -253,7 +338,7 @@ function AddTransaction() {
               placeholder="Enter Description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-300 text-2xl"
+              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-300 text-xl md:text-2xl"
               required
             />
 
@@ -265,7 +350,7 @@ function AddTransaction() {
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 text-2xl"
+            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 text-xl md:text-2xl"
             required
           >
 
@@ -289,7 +374,7 @@ function AddTransaction() {
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-purple-300 text-2xl"
+            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-purple-300 text-xl md:text-2xl"
             required
           >
 
@@ -299,17 +384,28 @@ function AddTransaction() {
 
             {
 
-              filteredCategories.map(
-                (cat) => (
+              filteredCategories.length === 0 ? (
 
-                  <option
-                    key={cat.id}
-                    value={cat.name}
-                  >
+                <option disabled>
 
-                    {cat.name}
+                  No Categories Available
 
-                  </option>
+                </option>
+
+              ) : (
+
+                filteredCategories.map(
+                  (cat) => (
+
+                    <option
+                      key={cat.id}
+                      value={cat.name}
+                    >
+
+                      {cat.name}
+
+                    </option>
+                  )
                 )
               )
             }
@@ -330,7 +426,7 @@ function AddTransaction() {
               value={formData.date}
               onChange={handleChange}
               max={maxDate}
-              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-red-300 text-2xl"
+              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-red-300 text-xl md:text-2xl"
               required
             />
 
@@ -341,7 +437,7 @@ function AddTransaction() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 rounded-3xl text-3xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 rounded-3xl text-2xl md:text-3xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
           >
 
             {

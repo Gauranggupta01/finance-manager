@@ -14,71 +14,144 @@ function Reports() {
     useState(null);
 
   const [yearly, setYearly] =
-    useState(null);
+    useState({});
 
-  useEffect(() => {
+  const [loading, setLoading] =
+    useState(true);
 
-    fetchMonthly();
-
-    fetchYearly();
-
-  }, []);
+  const [error, setError] =
+    useState("");
 
   const username =
     localStorage.getItem("username");
 
-  const fetchMonthly = async () => {
+  useEffect(() => {
+
+    if (!username) {
+
+      setError("User not found");
+
+      setLoading(false);
+
+      return;
+    }
+
+    fetchReports();
+
+  }, []);
+
+  const fetchReports = async () => {
 
     try {
 
-      const response = await API.get(
+      setLoading(true);
 
-        `/reports/monthly/${username}?month=5&year=2026`
+      setError("");
+
+      const monthlyResponse =
+        await API.get(
+          `/reports/monthly/${username}?month=5&year=2026`
+        );
+
+      const yearlyResponse =
+        await API.get(
+          `/reports/yearly/${username}?year=2026`
+        );
+
+      console.log(
+        "MONTHLY:",
+        monthlyResponse.data
       );
 
-      setMonthly(response.data);
+      console.log(
+        "YEARLY:",
+        yearlyResponse.data
+      );
+
+      setMonthly(
+        monthlyResponse.data || {}
+      );
+
+      setYearly(
+        yearlyResponse.data || {}
+      );
 
     } catch (error) {
 
-      console.log(error);
-    }
-  };
-
-  const fetchYearly = async () => {
-
-    try {
-
-      const response = await API.get(
-
-        `/reports/yearly/${username}?year=2026`
+      console.log(
+        "REPORT ERROR:",
+        error
       );
 
-      setYearly(response.data);
+      setError(
+        "Unable to load reports"
+      );
 
-    } catch (error) {
+    } finally {
 
-      console.log(error);
+      setLoading(false);
     }
   };
+
+  if (loading) {
+
+    return (
+
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-blue-950 to-black">
+
+        <h1 className="text-4xl font-bold text-white animate-pulse">
+
+          Loading Reports...
+
+        </h1>
+
+      </div>
+    );
+  }
+
+  if (error) {
+
+    return (
+
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-blue-950 to-black px-6">
+
+        <div className="bg-red-500/20 border border-red-400 text-white p-10 rounded-3xl shadow-2xl text-center">
+
+          <h1 className="text-4xl font-bold mb-4">
+
+            Error
+
+          </h1>
+
+          <p className="text-xl">
+
+            {error}
+
+          </p>
+
+        </div>
+
+      </div>
+    );
+  }
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 p-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 p-6 md:p-10">
 
       {/* HEADER */}
 
       <div className="mb-12">
 
-        <h1 className="text-6xl font-extrabold text-gray-800">
+        <h1 className="text-4xl md:text-6xl font-extrabold text-gray-800">
 
           Reports & Analytics
 
         </h1>
 
-        <p className="text-xl text-gray-600 mt-3">
+        <p className="text-lg md:text-xl text-gray-600 mt-3">
 
-          Financial overview for:
-          {" "}
+          Financial overview for{" "}
 
           <span className="font-bold text-green-600">
 
@@ -96,9 +169,9 @@ function Reports() {
 
         monthly && (
 
-          <div className="bg-white/70 backdrop-blur-lg border border-white/30 p-10 rounded-3xl shadow-2xl mb-14">
+          <div className="bg-white/70 backdrop-blur-lg border border-white/30 p-6 md:p-10 rounded-3xl shadow-2xl mb-14">
 
-            <h2 className="text-5xl font-bold mb-10 text-gray-800">
+            <h2 className="text-3xl md:text-5xl font-bold mb-10 text-gray-800">
 
               Monthly Report
 
@@ -114,7 +187,7 @@ function Reports() {
 
                   <FaArrowTrendUp className="text-green-600 text-3xl" />
 
-                  <h3 className="text-3xl font-bold">
+                  <h3 className="text-2xl md:text-3xl font-bold">
 
                     Income Categories
 
@@ -124,29 +197,43 @@ function Reports() {
 
                 {
 
+                  monthly.incomeByCategory &&
                   Object.entries(
                     monthly.incomeByCategory
-                  ).map(([key, value]) => (
+                  ).length > 0 ? (
 
-                    <div
-                      key={key}
-                      className="flex justify-between items-center py-3 border-b border-green-200"
-                    >
+                    Object.entries(
+                      monthly.incomeByCategory
+                    ).map(([key, value]) => (
 
-                      <span className="text-xl font-medium">
+                      <div
+                        key={key}
+                        className="flex justify-between items-center py-3 border-b border-green-200"
+                      >
 
-                        {key}
+                        <span className="text-lg md:text-xl font-medium">
 
-                      </span>
+                          {key}
 
-                      <span className="text-2xl font-bold text-green-700">
+                        </span>
 
-                        ₹ {value}
+                        <span className="text-xl md:text-2xl font-bold text-green-700">
 
-                      </span>
+                          ₹ {value}
 
-                    </div>
-                  ))
+                        </span>
+
+                      </div>
+                    ))
+
+                  ) : (
+
+                    <p className="text-lg">
+
+                      No Income Found
+
+                    </p>
+                  )
                 }
 
               </div>
@@ -159,7 +246,7 @@ function Reports() {
 
                   <FaArrowTrendDown className="text-red-600 text-3xl" />
 
-                  <h3 className="text-3xl font-bold">
+                  <h3 className="text-2xl md:text-3xl font-bold">
 
                     Expense Categories
 
@@ -169,17 +256,10 @@ function Reports() {
 
                 {
 
+                  monthly.expenseByCategory &&
                   Object.entries(
                     monthly.expenseByCategory
-                  ).length === 0 ? (
-
-                    <p className="text-xl">
-
-                      No Expenses Found
-
-                    </p>
-
-                  ) : (
+                  ).length > 0 ? (
 
                     Object.entries(
                       monthly.expenseByCategory
@@ -190,13 +270,13 @@ function Reports() {
                         className="flex justify-between items-center py-3 border-b border-red-200"
                       >
 
-                        <span className="text-xl font-medium">
+                        <span className="text-lg md:text-xl font-medium">
 
                           {key}
 
                         </span>
 
-                        <span className="text-2xl font-bold text-red-700">
+                        <span className="text-xl md:text-2xl font-bold text-red-700">
 
                           ₹ {value}
 
@@ -204,6 +284,14 @@ function Reports() {
 
                       </div>
                     ))
+
+                  ) : (
+
+                    <p className="text-lg">
+
+                      No Expenses Found
+
+                    </p>
                   )
                 }
 
@@ -217,7 +305,7 @@ function Reports() {
 
                   <FaWallet className="text-blue-600 text-3xl" />
 
-                  <h3 className="text-3xl font-bold">
+                  <h3 className="text-2xl md:text-3xl font-bold">
 
                     Net Savings
 
@@ -225,9 +313,13 @@ function Reports() {
 
                 </div>
 
-                <p className="text-7xl font-extrabold text-blue-700">
+                <p className="text-5xl md:text-7xl font-extrabold text-blue-700 break-words">
 
-                  ₹ {monthly.netSavings}
+                  ₹ {
+
+                    monthly.netSavings || 0
+
+                  }
 
                 </p>
 
@@ -241,17 +333,25 @@ function Reports() {
 
       {/* YEARLY REPORT */}
 
-      {
+      <div className="bg-white/70 backdrop-blur-lg border border-white/30 p-6 md:p-10 rounded-3xl shadow-2xl">
 
-        yearly && (
+        <h2 className="text-3xl md:text-5xl font-bold mb-10 text-gray-800">
 
-          <div className="bg-white/70 backdrop-blur-lg border border-white/30 p-10 rounded-3xl shadow-2xl">
+          Yearly Report
 
-            <h2 className="text-5xl font-bold mb-10 text-gray-800">
+        </h2>
 
-              Yearly Report
+        {
 
-            </h2>
+          Object.keys(yearly).length === 0 ? (
+
+            <p className="text-xl text-gray-600">
+
+              No yearly data found
+
+            </p>
+
+          ) : (
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
 
@@ -272,7 +372,7 @@ function Reports() {
                       </h3>
 
                       <p
-                        className={`text-5xl font-extrabold ${
+                        className={`text-4xl md:text-5xl font-extrabold ${
                           value >= 0
                             ? "text-green-600"
                             : "text-red-600"
@@ -288,10 +388,10 @@ function Reports() {
               }
 
             </div>
+          )
+        }
 
-          </div>
-        )
-      }
+      </div>
 
     </div>
   );
