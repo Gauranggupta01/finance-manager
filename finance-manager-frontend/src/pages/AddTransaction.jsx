@@ -80,7 +80,7 @@ function AddTransaction() {
         );
 
       console.log(
-        "CATEGORIES:",
+        "CATEGORY RESPONSE:",
         response.data
       );
 
@@ -120,7 +120,8 @@ function AddTransaction() {
     const { name, value } =
       e.target;
 
-    // RESET CATEGORY WHEN TYPE CHANGES
+    // RESET CATEGORY
+    // WHEN TYPE CHANGES
 
     if (name === "type") {
 
@@ -147,20 +148,43 @@ function AddTransaction() {
   // FILTER CATEGORIES
 
   const filteredCategories =
-    categories.filter(
+    categories.filter((cat) => {
 
-      (cat) =>
+      if (
+        !cat?.type ||
+        !formData?.type
+      ) {
 
-        cat?.type
-          ?.trim()
-          ?.toUpperCase()
+        return false;
+      }
+
+      return (
+        String(cat.type)
+          .trim()
+          .toUpperCase()
 
         ===
 
-        formData.type
-          ?.trim()
-          ?.toUpperCase()
-    );
+        String(formData.type)
+          .trim()
+          .toUpperCase()
+      );
+    });
+
+  console.log(
+    "TYPE:",
+    formData.type
+  );
+
+  console.log(
+    "ALL CATEGORIES:",
+    categories
+  );
+
+  console.log(
+    "FILTERED:",
+    filteredCategories
+  );
 
   // SUBMIT
 
@@ -183,7 +207,7 @@ function AddTransaction() {
       };
 
       console.log(
-        "SUBMIT:",
+        "SUBMIT DATA:",
         updatedData
       );
 
