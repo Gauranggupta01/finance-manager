@@ -2,6 +2,7 @@ import {
   BrowserRouter,
   Routes,
   Route,
+  Navigate,
 } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
@@ -22,11 +23,16 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
 
+  const token =
+    localStorage.getItem("token");
+
   return (
 
     <BrowserRouter>
 
-      <Navbar />
+      {
+        token && <Navbar />
+      }
 
       <Routes>
 
@@ -34,12 +40,20 @@ function App() {
 
         <Route
           path="/login"
-          element={<Login />}
+          element={
+            token
+              ? <Navigate to="/" />
+              : <Login />
+          }
         />
 
         <Route
           path="/register"
-          element={<Register />}
+          element={
+            token
+              ? <Navigate to="/" />
+              : <Register />
+          }
         />
 
         {/* PROTECTED ROUTES */}
@@ -85,6 +99,21 @@ function App() {
               <Reports />
 
             </ProtectedRoute>
+          }
+        />
+
+        {/* FALLBACK */}
+
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to={
+                token
+                  ? "/"
+                  : "/login"
+              }
+            />
           }
         />
 
