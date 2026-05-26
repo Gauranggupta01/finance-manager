@@ -1,0 +1,331 @@
+import { useState, useEffect } from "react";
+
+import API from "../services/api";
+
+import {
+  FaMoneyBillWave,
+  FaAlignLeft,
+  FaCalendarAlt,
+} from "react-icons/fa";
+
+function AddTransaction() {
+
+  // TODAY DATE FIX
+
+  const today = new Date();
+
+  today.setMinutes(
+    today.getMinutes() -
+    today.getTimezoneOffset()
+  );
+
+  const maxDate =
+    today.toISOString().split("T")[0];
+
+  // FORM STATE
+
+  const [formData, setFormData] =
+    useState({
+
+      amount: "",
+
+      description: "",
+
+      category: "",
+
+      type: "",
+
+      date: "",
+    });
+
+  // CATEGORY STATE
+
+  const [categories, setCategories] =
+    useState([]);
+
+  // FETCH CATEGORIES
+
+  useEffect(() => {
+
+    fetchCategories();
+
+  }, []);
+
+  const fetchCategories = async () => {
+
+    try {
+
+      const username =
+        localStorage.getItem("username");
+
+      const response = await API.get(
+
+        `/categories/${username}`
+      );
+
+      console.log(
+        "CATEGORIES:",
+        response.data
+      );
+
+      setCategories(response.data);
+
+    } catch (error) {
+
+      console.log(
+        "CATEGORY ERROR:",
+        error
+      );
+    }
+  };
+
+  // HANDLE INPUT CHANGE
+
+  const handleChange = (e) => {
+
+    setFormData({
+
+      ...formData,
+
+      [e.target.name]:
+        e.target.value,
+    });
+  };
+
+  // SUBMIT FORM
+
+  const handleSubmit = async (e) => {
+
+    e.preventDefault();
+
+    try {
+
+      const username =
+        localStorage.getItem("username");
+
+      const updatedData = {
+
+        ...formData,
+
+        username,
+      };
+
+      await API.post(
+
+        "/transactions",
+
+        updatedData
+      );
+
+      alert(
+        "Transaction Added Successfully"
+      );
+
+      // RESET FORM
+
+      setFormData({
+
+        amount: "",
+
+        description: "",
+
+        category: "",
+
+        type: "",
+
+        date: "",
+      });
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert(
+        "Error Adding Transaction"
+      );
+    }
+  };
+
+  return (
+
+    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 flex justify-center items-center p-10">
+
+      <div className="backdrop-blur-lg bg-white/70 border border-white/30 p-10 rounded-3xl shadow-2xl w-full max-w-2xl">
+
+        {/* HEADER */}
+
+        <div className="text-center mb-12">
+
+          <h1 className="text-7xl font-extrabold text-gray-800 mb-4">
+
+            Add Transaction
+
+          </h1>
+
+          <p className="text-2xl text-gray-600">
+
+            Track your income and expenses
+
+          </p>
+
+        </div>
+
+        {/* FORM */}
+
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-8"
+        >
+
+          {/* AMOUNT */}
+
+          <div className="relative">
+
+            <FaMoneyBillWave
+              className="absolute left-6 top-6 text-green-500 text-2xl"
+            />
+
+            <input
+              type="number"
+              name="amount"
+              placeholder="Enter Amount"
+              value={formData.amount}
+              onChange={handleChange}
+              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-green-300 text-2xl"
+              required
+            />
+
+          </div>
+
+          {/* DESCRIPTION */}
+
+          <div className="relative">
+
+            <FaAlignLeft
+              className="absolute left-6 top-6 text-blue-500 text-2xl"
+            />
+
+            <input
+              type="text"
+              name="description"
+              placeholder="Enter Description"
+              value={formData.description}
+              onChange={handleChange}
+              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-300 text-2xl"
+              required
+            />
+
+          </div>
+
+          {/* TYPE */}
+
+          <select
+            name="type"
+            value={formData.type}
+            onChange={handleChange}
+            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 text-2xl"
+            required
+          >
+
+            <option value="">
+              Select Type
+            </option>
+
+            <option value="INCOME">
+              INCOME
+            </option>
+
+            <option value="EXPENSE">
+              EXPENSE
+            </option>
+
+          </select>
+
+          {/* CATEGORY */}
+
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-purple-300 text-2xl"
+            required
+          >
+
+            <option value="">
+              Select Category
+            </option>
+
+            {
+
+              categories
+
+                .filter(
+
+                  (cat) =>
+
+                    cat.type
+                      ?.trim()
+                      ?.toUpperCase()
+
+                    ===
+
+                    formData.type
+                      ?.trim()
+                      ?.toUpperCase()
+                )
+
+                .map((cat) => (
+
+                  <option
+                    key={cat.id}
+                    value={cat.name}
+                  >
+
+                    {cat.name}
+
+                  </option>
+                ))
+            }
+
+          </select>
+
+          {/* DATE */}
+
+          <div className="relative">
+
+            <FaCalendarAlt
+              className="absolute left-6 top-6 text-red-500 text-2xl"
+            />
+
+            <input
+              type="date"
+              name="date"
+              value={formData.date}
+              onChange={handleChange}
+              max={maxDate}
+              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-red-300 text-2xl"
+              required
+            />
+
+          </div>
+
+          {/* BUTTON */}
+
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 rounded-3xl text-3xl font-bold hover:scale-105 transition duration-300 shadow-xl"
+          >
+
+            Add Transaction
+
+          </button>
+
+        </form>
+
+      </div>
+
+    </div>
+  );
+}
+
+export default AddTransaction;
