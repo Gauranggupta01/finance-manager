@@ -10,8 +10,6 @@ import {
 
 function AddTransaction() {
 
-  // TODAY DATE FIX
-
   const today = new Date();
 
   today.setMinutes(
@@ -21,8 +19,6 @@ function AddTransaction() {
 
   const maxDate =
     today.toISOString().split("T")[0];
-
-  // FORM STATE
 
   const [formData, setFormData] =
     useState({
@@ -38,10 +34,11 @@ function AddTransaction() {
       date: "",
     });
 
-  // CATEGORY STATE
-
   const [categories, setCategories] =
     useState([]);
+
+  const [loading, setLoading] =
+    useState(false);
 
   // FETCH CATEGORIES
 
@@ -58,10 +55,10 @@ function AddTransaction() {
       const username =
         localStorage.getItem("username");
 
-      const response = await API.get(
-
-        `/categories/${username}`
-      );
+      const response =
+        await API.get(
+          `/categories/${username}`
+        );
 
       console.log(
         "CATEGORIES:",
@@ -76,6 +73,10 @@ function AddTransaction() {
         "CATEGORY ERROR:",
         error
       );
+
+      alert(
+        "Unable to load categories"
+      );
     }
   };
 
@@ -83,12 +84,29 @@ function AddTransaction() {
 
   const handleChange = (e) => {
 
+    const { name, value } = e.target;
+
+    // RESET CATEGORY WHEN TYPE CHANGES
+
+    if (name === "type") {
+
+      setFormData({
+
+        ...formData,
+
+        type: value,
+
+        category: "",
+      });
+
+      return;
+    }
+
     setFormData({
 
       ...formData,
 
-      [e.target.name]:
-        e.target.value,
+      [name]: value,
     });
   };
 
@@ -97,6 +115,8 @@ function AddTransaction() {
   const handleSubmit = async (e) => {
 
     e.preventDefault();
+
+    setLoading(true);
 
     try {
 
@@ -143,8 +163,30 @@ function AddTransaction() {
       alert(
         "Error Adding Transaction"
       );
+
+    } finally {
+
+      setLoading(false);
     }
   };
+
+  // FILTER CATEGORIES
+
+  const filteredCategories =
+    categories.filter(
+
+      (cat) =>
+
+        cat.type
+          ?.trim()
+          ?.toUpperCase()
+
+        ===
+
+        formData.type
+          ?.trim()
+          ?.toUpperCase()
+    );
 
   return (
 
@@ -257,24 +299,8 @@ function AddTransaction() {
 
             {
 
-              categories
-
-                .filter(
-
-                  (cat) =>
-
-                    cat.type
-                      ?.trim()
-                      ?.toUpperCase()
-
-                    ===
-
-                    formData.type
-                      ?.trim()
-                      ?.toUpperCase()
-                )
-
-                .map((cat) => (
+              filteredCategories.map(
+                (cat) => (
 
                   <option
                     key={cat.id}
@@ -284,7 +310,8 @@ function AddTransaction() {
                     {cat.name}
 
                   </option>
-                ))
+                )
+              )
             }
 
           </select>
@@ -313,10 +340,15 @@ function AddTransaction() {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 rounded-3xl text-3xl font-bold hover:scale-105 transition duration-300 shadow-xl"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 rounded-3xl text-3xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60"
           >
 
-            Add Transaction
+            {
+              loading
+                ? "Adding..."
+                : "Add Transaction"
+            }
 
           </button>
 
