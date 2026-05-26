@@ -42,7 +42,7 @@ function AddTransaction() {
       date: maxDate,
     });
 
-  // STATIC CATEGORY DATA
+  // STATIC CATEGORIES
 
   const categories = {
 
@@ -109,7 +109,7 @@ function AddTransaction() {
     });
   };
 
-  // SUBMIT
+  // SUBMIT FORM
 
   const handleSubmit = async (e) => {
 
@@ -135,7 +135,7 @@ function AddTransaction() {
         return;
       }
 
-      const updatedData = {
+      const transactionData = {
 
         amount:
           Number(formData.amount),
@@ -158,7 +158,7 @@ function AddTransaction() {
 
       console.log(
         "SENDING:",
-        updatedData
+        transactionData
       );
 
       const response =
@@ -166,11 +166,11 @@ function AddTransaction() {
 
           "/transactions",
 
-          updatedData
+          transactionData
         );
 
       console.log(
-        "RESPONSE:",
+        "SUCCESS:",
         response.data
       );
 
@@ -201,9 +201,7 @@ function AddTransaction() {
 
       console.log(error);
 
-      if (
-        error.response
-      ) {
+      if (error.response) {
 
         console.log(
           error.response.data
