@@ -2,10 +2,6 @@ package com.anvesh.finance_manager.entity;
 
 import jakarta.persistence.*;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import java.time.LocalDate;
-
 @Entity
 @Table(name = "transactions")
 public class Transaction {
@@ -24,8 +20,7 @@ public class Transaction {
 
     private String type;
 
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate date;
+    private String date;
 
     public Transaction() {
     }
@@ -74,11 +69,11 @@ public class Transaction {
         this.type = type;
     }
 
-    public LocalDate getDate() {
+    public String getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
+    public void setDate(String date) {
         this.date = date;
     }
 }
