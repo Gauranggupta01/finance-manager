@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import API from "../services/api";
 
@@ -35,83 +35,40 @@ function AddTransaction() {
       date: "",
     });
 
-  const [categories, setCategories] =
-    useState([]);
-
   const [loading, setLoading] =
     useState(false);
 
-  const [categoryLoading,
-    setCategoryLoading] =
-    useState(true);
+  // STATIC CATEGORIES
 
-  const [error, setError] =
-    useState("");
+  const incomeCategories = [
 
-  // FETCH CATEGORIES
+    "Salary",
 
-  useEffect(() => {
+    "Freelancing",
 
-    fetchCategories();
+    "Business",
 
-  }, []);
+    "Investment",
 
-  const fetchCategories = async () => {
+    "Bonus",
+  ];
 
-    try {
+  const expenseCategories = [
 
-      setCategoryLoading(true);
+    "Food",
 
-      setError("");
+    "Rent",
 
-      const username =
-        localStorage.getItem("username");
+    "Transportation",
 
-      if (!username) {
+    "Entertainment",
 
-        setError("User not found");
+    "Healthcare",
 
-        return;
-      }
+    "Utilities",
 
-      const response =
-        await API.get(
-          `/categories/${username}`
-        );
-
-      console.log(
-        "CATEGORY RESPONSE:",
-        response.data
-      );
-
-      if (
-        Array.isArray(response.data)
-      ) {
-
-        setCategories(
-          response.data
-        );
-
-      } else {
-
-        setCategories([]);
-      }
-
-    } catch (error) {
-
-      console.log(error);
-
-      setError(
-        "Unable to load categories"
-      );
-
-      setCategories([]);
-
-    } finally {
-
-      setCategoryLoading(false);
-    }
-  };
+    "Shopping",
+  ];
 
   // HANDLE INPUT
 
@@ -145,46 +102,15 @@ function AddTransaction() {
     });
   };
 
-  // FILTER CATEGORIES
+  // CATEGORY OPTIONS
 
-  const filteredCategories =
-    categories.filter((cat) => {
+  const categoryOptions =
 
-      if (
-        !cat?.type ||
-        !formData?.type
-      ) {
+    formData.type === "INCOME"
 
-        return false;
-      }
+      ? incomeCategories
 
-      return (
-        String(cat.type)
-          .trim()
-          .toUpperCase()
-
-        ===
-
-        String(formData.type)
-          .trim()
-          .toUpperCase()
-      );
-    });
-
-  console.log(
-    "TYPE:",
-    formData.type
-  );
-
-  console.log(
-    "ALL CATEGORIES:",
-    categories
-  );
-
-  console.log(
-    "FILTERED:",
-    filteredCategories
-  );
+      : expenseCategories;
 
   // SUBMIT
 
@@ -250,58 +176,6 @@ function AddTransaction() {
       setLoading(false);
     }
   };
-
-  // LOADING SCREEN
-
-  if (categoryLoading) {
-
-    return (
-
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-black to-slate-950">
-
-        <div className="text-center">
-
-          <div className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
-
-          <h1 className="text-4xl font-bold text-white">
-
-            Loading Categories...
-
-          </h1>
-
-        </div>
-
-      </div>
-    );
-  }
-
-  // ERROR SCREEN
-
-  if (error) {
-
-    return (
-
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-black to-slate-950 px-6">
-
-        <div className="bg-red-500/20 border border-red-400 p-10 rounded-3xl shadow-2xl text-center max-w-xl">
-
-          <h1 className="text-5xl font-bold text-white mb-5">
-
-            Error
-
-          </h1>
-
-          <p className="text-xl text-gray-200">
-
-            {error}
-
-          </p>
-
-        </div>
-
-      </div>
-    );
-  }
 
   return (
 
@@ -432,33 +306,19 @@ function AddTransaction() {
 
               {
 
-                filteredCategories.length > 0 ? (
+                categoryOptions.map(
+                  (category, index) => (
 
-                  filteredCategories.map(
-                    (cat) => (
+                    <option
+                      key={index}
+                      value={category}
+                      className="text-black"
+                    >
 
-                      <option
-                        key={cat.id}
-                        value={cat.name}
-                        className="text-black"
-                      >
+                      {category}
 
-                        {cat.name}
-
-                      </option>
-                    )
+                    </option>
                   )
-
-                ) : (
-
-                  <option
-                    disabled
-                    className="text-black"
-                  >
-
-                    No Categories Available
-
-                  </option>
                 )
               }
 
