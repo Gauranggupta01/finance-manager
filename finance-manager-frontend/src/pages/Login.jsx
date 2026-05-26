@@ -22,6 +22,9 @@ function Login() {
       password: "",
     });
 
+  const [loading, setLoading] =
+    useState(false);
+
   const handleChange = (e) => {
 
     setFormData({
@@ -37,14 +40,17 @@ function Login() {
 
     e.preventDefault();
 
+    setLoading(true);
+
     try {
 
-      const response = await axios.post(
+      const response =
+        await axios.post(
 
-        "http://localhost:8081/api/auth/login",
+          "https://finance-manager-jbir.onrender.com/api/auth/login",
 
-        formData
-      );
+          formData
+        );
 
       alert(response.data.message);
 
@@ -68,15 +74,30 @@ function Login() {
 
       console.log(error);
 
-      alert("Login Failed");
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.message
+      ) {
+
+        alert(
+          error.response.data.message
+        );
+
+      } else {
+
+        alert("Login Failed");
+      }
+
+    } finally {
+
+      setLoading(false);
     }
   };
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-black flex justify-center items-center px-6">
-
-      {/* CARD */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-black flex justify-center items-center px-6 py-10">
 
       <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-3xl p-10">
 
@@ -113,7 +134,7 @@ function Login() {
           className="space-y-6"
         >
 
-          {/* USERNAME */}
+          {/* EMAIL */}
 
           <div className="relative">
 
@@ -122,7 +143,7 @@ function Login() {
             />
 
             <input
-              type="text"
+              type="email"
               name="username"
               placeholder="Enter Email"
               value={formData.username}
@@ -157,10 +178,15 @@ function Login() {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl text-xl font-bold hover:scale-105 transition duration-300 shadow-xl"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl text-xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60"
           >
 
-            Login
+            {
+              loading
+                ? "Logging in..."
+                : "Login"
+            }
 
           </button>
 
@@ -173,7 +199,9 @@ function Login() {
           New user?{" "}
 
           <span
-            onClick={() => navigate("/register")}
+            onClick={() =>
+              navigate("/register")
+            }
             className="text-green-400 cursor-pointer hover:underline"
           >
 

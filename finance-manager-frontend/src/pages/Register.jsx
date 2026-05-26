@@ -16,17 +16,19 @@ function Register() {
 
   const navigate = useNavigate();
 
-  const [formData, setFormData] =
-    useState({
+  const [formData, setFormData] = useState({
 
-      fullName: "",
+    fullName: "",
 
-      username: "",
+    username: "",
 
-      phoneNumber: "",
+    phoneNumber: "",
 
-      password: "",
-    });
+    password: "",
+  });
+
+  const [loading, setLoading] =
+    useState(false);
 
   const handleChange = (e) => {
 
@@ -43,14 +45,17 @@ function Register() {
 
     e.preventDefault();
 
+    setLoading(true);
+
     try {
 
-      const response = await axios.post(
+      const response =
+        await axios.post(
 
-        "http://localhost:8081/api/auth/register",
+          "https://finance-manager-jbir.onrender.com/api/auth/register",
 
-        formData
-      );
+          formData
+        );
 
       alert(response.data);
 
@@ -60,19 +65,31 @@ function Register() {
 
       console.log(error);
 
-      alert("Registration Failed");
+      if (
+        error.response &&
+        error.response.data
+      ) {
+
+        alert(error.response.data);
+
+      } else {
+
+        alert(
+          "Registration Failed"
+        );
+      }
+
+    } finally {
+
+      setLoading(false);
     }
   };
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-black flex justify-center items-center px-6">
-
-      {/* CARD */}
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-black flex justify-center items-center px-6 py-10">
 
       <div className="w-full max-w-lg bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl shadow-2xl p-10">
-
-        {/* ICON */}
 
         <div className="flex justify-center mb-6">
 
@@ -83,8 +100,6 @@ function Register() {
           </div>
 
         </div>
-
-        {/* TITLE */}
 
         <h1 className="text-5xl font-extrabold text-center text-white mb-3">
 
@@ -98,14 +113,10 @@ function Register() {
 
         </p>
 
-        {/* FORM */}
-
         <form
           onSubmit={handleSubmit}
           className="space-y-6"
         >
-
-          {/* FULL NAME */}
 
           <div className="relative">
 
@@ -125,8 +136,6 @@ function Register() {
 
           </div>
 
-          {/* USERNAME */}
-
           <div className="relative">
 
             <FaEnvelope
@@ -144,8 +153,6 @@ function Register() {
             />
 
           </div>
-
-          {/* PHONE */}
 
           <div className="relative">
 
@@ -165,8 +172,6 @@ function Register() {
 
           </div>
 
-          {/* PASSWORD */}
-
           <div className="relative">
 
             <FaLock
@@ -185,27 +190,30 @@ function Register() {
 
           </div>
 
-          {/* BUTTON */}
-
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-2xl text-xl font-bold hover:scale-105 transition duration-300 shadow-xl"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white p-4 rounded-2xl text-xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60"
           >
 
-            Register
+            {
+              loading
+                ? "Registering..."
+                : "Register"
+            }
 
           </button>
 
         </form>
-
-        {/* FOOTER */}
 
         <p className="text-center text-gray-400 mt-8">
 
           Already have an account?{" "}
 
           <span
-            onClick={() => navigate("/login")}
+            onClick={() =>
+              navigate("/login")
+            }
             className="text-blue-400 cursor-pointer hover:underline"
           >
 
