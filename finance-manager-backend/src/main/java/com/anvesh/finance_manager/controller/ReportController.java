@@ -30,29 +30,42 @@ public class ReportController {
                 transactionService
                         .getTransactionsByUsername(username);
 
-        double income = 0;
-        double expense = 0;
+        double totalIncome = 0;
+        double totalExpense = 0;
 
-        for (Transaction t : transactions) {
+        for (Transaction transaction : transactions) {
 
-            if ("INCOME".equalsIgnoreCase(t.getType())) {
+            if ("INCOME".equalsIgnoreCase(
+                    transaction.getType()
+            )) {
 
-                income += t.getAmount();
+                totalIncome +=
+                        transaction.getAmount();
 
             } else {
 
-                expense += t.getAmount();
+                totalExpense +=
+                        transaction.getAmount();
             }
         }
 
         Map<String, Object> report =
                 new HashMap<>();
 
-        report.put("totalIncome", income);
+        report.put(
+                "totalIncome",
+                totalIncome
+        );
 
-        report.put("totalExpense", expense);
+        report.put(
+                "totalExpense",
+                totalExpense
+        );
 
-        report.put("netSavings", income - expense);
+        report.put(
+                "netSavings",
+                totalIncome - totalExpense
+        );
 
         return report;
     }
@@ -82,10 +95,13 @@ public class ReportController {
         double totalIncome = 0;
         double totalExpense = 0;
 
-        for (Transaction t : transactions) {
+        for (Transaction transaction : transactions) {
 
-            if (t.getDate() == null ||
-                    t.getDate().isEmpty()) {
+            String date =
+                    transaction.getDate();
+
+            if (date == null ||
+                    date.isEmpty()) {
 
                 continue;
             }
@@ -93,7 +109,7 @@ public class ReportController {
             try {
 
                 String[] parts =
-                        t.getDate().split("-");
+                        date.split("-");
 
                 int transactionYear =
                         Integer.parseInt(parts[0]);
@@ -101,37 +117,45 @@ public class ReportController {
                 int transactionMonth =
                         Integer.parseInt(parts[1]);
 
-                if (transactionMonth == month &&
-                        transactionYear == year) {
+                if (
+                        transactionYear == year &&
+                        transactionMonth == month
+                ) {
 
                     if ("INCOME".equalsIgnoreCase(
-                            t.getType()
+                            transaction.getType()
                     )) {
 
-                        totalIncome += t.getAmount();
+                        totalIncome +=
+                                transaction.getAmount();
 
                         incomeByCategory.put(
 
-                                t.getCategory(),
+                                transaction.getCategory(),
 
                                 incomeByCategory.getOrDefault(
-                                        t.getCategory(),
+
+                                        transaction.getCategory(),
+
                                         0.0
-                                ) + t.getAmount()
+                                ) + transaction.getAmount()
                         );
 
                     } else {
 
-                        totalExpense += t.getAmount();
+                        totalExpense +=
+                                transaction.getAmount();
 
                         expenseByCategory.put(
 
-                                t.getCategory(),
+                                transaction.getCategory(),
 
                                 expenseByCategory.getOrDefault(
-                                        t.getCategory(),
+
+                                        transaction.getCategory(),
+
                                         0.0
-                                ) + t.getAmount()
+                                ) + transaction.getAmount()
                         );
                     }
                 }
@@ -139,8 +163,8 @@ public class ReportController {
             } catch (Exception e) {
 
                 System.out.println(
-                        "Invalid date format: "
-                                + t.getDate()
+                        "Invalid date format : "
+                                + date
                 );
             }
         }
@@ -177,10 +201,13 @@ public class ReportController {
             monthlySavings.put(i, 0.0);
         }
 
-        for (Transaction t : transactions) {
+        for (Transaction transaction : transactions) {
 
-            if (t.getDate() == null ||
-                    t.getDate().isEmpty()) {
+            String date =
+                    transaction.getDate();
+
+            if (date == null ||
+                    date.isEmpty()) {
 
                 continue;
             }
@@ -188,7 +215,7 @@ public class ReportController {
             try {
 
                 String[] parts =
-                        t.getDate().split("-");
+                        date.split("-");
 
                 int transactionYear =
                         Integer.parseInt(parts[0]);
@@ -198,20 +225,21 @@ public class ReportController {
 
                 if (transactionYear == year) {
 
-                    double current =
+                    double currentValue =
                             monthlySavings.get(
                                     transactionMonth
                             );
 
                     if ("INCOME".equalsIgnoreCase(
-                            t.getType()
+                            transaction.getType()
                     )) {
 
                         monthlySavings.put(
 
                                 transactionMonth,
 
-                                current + t.getAmount()
+                                currentValue +
+                                        transaction.getAmount()
                         );
 
                     } else {
@@ -220,7 +248,8 @@ public class ReportController {
 
                                 transactionMonth,
 
-                                current - t.getAmount()
+                                currentValue -
+                                        transaction.getAmount()
                         );
                     }
                 }
@@ -228,8 +257,8 @@ public class ReportController {
             } catch (Exception e) {
 
                 System.out.println(
-                        "Invalid date format: "
-                                + t.getDate()
+                        "Invalid date format : "
+                                + date
                 );
             }
         }
