@@ -2,6 +2,8 @@ package com.anvesh.finance_manager.entity;
 
 import jakarta.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.time.LocalDate;
 
 @Entity
@@ -22,6 +24,7 @@ public class Transaction {
 
     private String type;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     public Transaction() {
@@ -39,6 +42,14 @@ public class Transaction {
         this.amount = amount;
     }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
     public String getDescription() {
         return description;
     }
@@ -53,14 +64,6 @@ public class Transaction {
 
     public void setCategory(String category) {
         this.category = category;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getType() {

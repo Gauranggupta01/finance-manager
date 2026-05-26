@@ -1,11 +1,9 @@
 package com.anvesh.finance_manager.controller;
 
 import com.anvesh.finance_manager.entity.Transaction;
-
 import com.anvesh.finance_manager.service.TransactionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,27 +20,29 @@ public class TransactionController {
 
     @PostMapping
     public Transaction createTransaction(
-
             @RequestBody Transaction transaction
     ) {
 
-        return transactionService
-                .createTransaction(transaction);
+        System.out.println("Transaction Received:");
+        System.out.println(transaction.getUsername());
+        System.out.println(transaction.getAmount());
+        System.out.println(transaction.getCategory());
+
+        return transactionService.createTransaction(
+                transaction
+        );
     }
 
-    // GET USER-SPECIFIC TRANSACTIONS
+    // GET USER TRANSACTIONS
 
     @GetMapping("/{username}")
     public List<Transaction> getTransactionsByUsername(
-
             @PathVariable String username
     ) {
 
-        return transactionService
-
-                .getTransactionsByUsername(
-                        username
-                );
+        return transactionService.getTransactionsByUsername(
+                username
+        );
     }
 
     // DELETE TRANSACTION
@@ -56,6 +56,8 @@ public class TransactionController {
 
         return "Transaction Deleted";
     }
+
+    // UPDATE TRANSACTION
 
     @PutMapping("/{id}")
     public Transaction updateTransaction(

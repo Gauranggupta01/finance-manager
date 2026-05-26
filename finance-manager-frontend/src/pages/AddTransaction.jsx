@@ -1,5 +1,7 @@
 import { useState } from "react";
 
+import { useNavigate } from "react-router-dom";
+
 import API from "../services/api";
 
 import {
@@ -11,6 +13,8 @@ import {
 
 function AddTransaction() {
 
+  const navigate = useNavigate();
+
   const today = new Date();
 
   today.setMinutes(
@@ -21,6 +25,9 @@ function AddTransaction() {
   const maxDate =
     today.toISOString().split("T")[0];
 
+  const [loading, setLoading] =
+    useState(false);
+
   const [formData, setFormData] =
     useState({
 
@@ -28,47 +35,47 @@ function AddTransaction() {
 
       description: "",
 
-      category: "",
+      type: "INCOME",
 
-      type: "",
+      category: "Salary",
 
-      date: "",
+      date: maxDate,
     });
 
-  const [loading, setLoading] =
-    useState(false);
+  // STATIC CATEGORY DATA
 
-  // STATIC CATEGORIES
+  const categories = {
 
-  const incomeCategories = [
+    INCOME: [
 
-    "Salary",
+      "Salary",
 
-    "Freelancing",
+      "Freelancing",
 
-    "Business",
+      "Business",
 
-    "Investment",
+      "Investment",
 
-    "Bonus",
-  ];
+      "Bonus",
+    ],
 
-  const expenseCategories = [
+    EXPENSE: [
 
-    "Food",
+      "Food",
 
-    "Rent",
+      "Rent",
 
-    "Transportation",
+      "Transportation",
 
-    "Entertainment",
+      "Entertainment",
 
-    "Healthcare",
+      "Healthcare",
 
-    "Utilities",
+      "Utilities",
 
-    "Shopping",
-  ];
+      "Shopping",
+    ],
+  };
 
   // HANDLE INPUT
 
@@ -77,8 +84,7 @@ function AddTransaction() {
     const { name, value } =
       e.target;
 
-    // RESET CATEGORY
-    // WHEN TYPE CHANGES
+    // TYPE CHANGE
 
     if (name === "type") {
 
@@ -88,7 +94,8 @@ function AddTransaction() {
 
         type: value,
 
-        category: "",
+        category:
+          categories[value][0],
       });
 
       return;
@@ -102,16 +109,6 @@ function AddTransaction() {
     });
   };
 
-  // CATEGORY OPTIONS
-
-  const categoryOptions =
-
-    formData.type === "INCOME"
-
-      ? incomeCategories
-
-      : expenseCategories;
-
   // SUBMIT
 
   const handleSubmit = async (e) => {
@@ -123,25 +120,58 @@ function AddTransaction() {
       setLoading(true);
 
       const username =
-        localStorage.getItem("username");
+        localStorage.getItem(
+          "username"
+        );
+
+      if (!username) {
+
+        alert(
+          "Please Login Again"
+        );
+
+        navigate("/login");
+
+        return;
+      }
 
       const updatedData = {
 
-        ...formData,
+        amount:
+          Number(formData.amount),
 
-        username,
+        description:
+          formData.description,
+
+        category:
+          formData.category,
+
+        type:
+          formData.type,
+
+        date:
+          formData.date,
+
+        username:
+          username,
       };
 
       console.log(
-        "SUBMIT DATA:",
+        "SENDING:",
         updatedData
       );
 
-      await API.post(
+      const response =
+        await API.post(
 
-        "/transactions",
+          "/transactions",
 
-        updatedData
+          updatedData
+        );
+
+      console.log(
+        "RESPONSE:",
+        response.data
       );
 
       alert(
@@ -156,20 +186,39 @@ function AddTransaction() {
 
         description: "",
 
-        category: "",
+        type: "INCOME",
 
-        type: "",
+        category: "Salary",
 
-        date: "",
+        date: maxDate,
       });
+
+      // REDIRECT
+
+      navigate("/transactions");
 
     } catch (error) {
 
       console.log(error);
 
-      alert(
-        "Error Adding Transaction"
-      );
+      if (
+        error.response
+      ) {
+
+        console.log(
+          error.response.data
+        );
+
+        alert(
+          "Backend Error"
+        );
+
+      } else {
+
+        alert(
+          "Failed To Add Transaction"
+        );
+      }
 
     } finally {
 
@@ -255,28 +304,24 @@ function AddTransaction() {
             value={formData.type}
             onChange={handleChange}
             className="w-full p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-indigo-400 text-xl"
-            required
           >
-
-            <option
-              value=""
-              className="text-black"
-            >
-              Select Type
-            </option>
 
             <option
               value="INCOME"
               className="text-black"
             >
+
               INCOME
+
             </option>
 
             <option
               value="EXPENSE"
               className="text-black"
             >
+
               EXPENSE
+
             </option>
 
           </select>
@@ -294,19 +339,13 @@ function AddTransaction() {
               value={formData.category}
               onChange={handleChange}
               className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-purple-400 text-xl"
-              required
             >
-
-              <option
-                value=""
-                className="text-black"
-              >
-                Select Category
-              </option>
 
               {
 
-                categoryOptions.map(
+                categories[
+                  formData.type
+                ].map(
                   (category, index) => (
 
                     <option
