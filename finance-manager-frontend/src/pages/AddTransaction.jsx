@@ -6,6 +6,7 @@ import {
   FaMoneyBillWave,
   FaAlignLeft,
   FaCalendarAlt,
+  FaTags,
 } from "react-icons/fa";
 
 function AddTransaction() {
@@ -70,8 +71,6 @@ function AddTransaction() {
 
         setError("User not found");
 
-        setCategoryLoading(false);
-
         return;
       }
 
@@ -100,16 +99,13 @@ function AddTransaction() {
 
     } catch (error) {
 
-      console.log(
-        "CATEGORY ERROR:",
-        error
-      );
-
-      setCategories([]);
+      console.log(error);
 
       setError(
         "Unable to load categories"
       );
+
+      setCategories([]);
 
     } finally {
 
@@ -117,7 +113,7 @@ function AddTransaction() {
     }
   };
 
-  // HANDLE INPUT CHANGE
+  // HANDLE INPUT
 
   const handleChange = (e) => {
 
@@ -148,7 +144,25 @@ function AddTransaction() {
     });
   };
 
-  // SUBMIT FORM
+  // FILTER CATEGORIES
+
+  const filteredCategories =
+    categories.filter(
+
+      (cat) =>
+
+        cat?.type
+          ?.trim()
+          ?.toUpperCase()
+
+        ===
+
+        formData.type
+          ?.trim()
+          ?.toUpperCase()
+    );
+
+  // SUBMIT
 
   const handleSubmit = async (e) => {
 
@@ -213,55 +227,47 @@ function AddTransaction() {
     }
   };
 
-  // FILTER CATEGORIES
-
-  const filteredCategories =
-    (categories || []).filter(
-
-      (cat) =>
-
-        cat?.type
-          ?.trim()
-          ?.toUpperCase()
-
-        ===
-
-        formData.type
-          ?.trim()
-          ?.toUpperCase()
-    );
+  // LOADING SCREEN
 
   if (categoryLoading) {
 
     return (
 
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-blue-950 to-black">
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-black to-slate-950">
 
-        <h1 className="text-4xl font-bold text-white animate-pulse">
+        <div className="text-center">
 
-          Loading Categories...
+          <div className="w-20 h-20 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
 
-        </h1>
+          <h1 className="text-4xl font-bold text-white">
+
+            Loading Categories...
+
+          </h1>
+
+        </div>
 
       </div>
     );
   }
 
+  // ERROR SCREEN
+
   if (error) {
 
     return (
 
-      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-blue-950 to-black px-6">
+      <div className="min-h-screen flex justify-center items-center bg-gradient-to-br from-slate-900 via-black to-slate-950 px-6">
 
-        <div className="bg-red-500/20 border border-red-400 text-white p-10 rounded-3xl shadow-2xl text-center">
+        <div className="bg-red-500/20 border border-red-400 p-10 rounded-3xl shadow-2xl text-center max-w-xl">
 
-          <h1 className="text-4xl font-bold mb-4">
+          <h1 className="text-5xl font-bold text-white mb-5">
 
             Error
 
           </h1>
 
-          <p className="text-xl">
+          <p className="text-xl text-gray-200">
 
             {error}
 
@@ -275,21 +281,21 @@ function AddTransaction() {
 
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-gray-100 to-gray-300 flex justify-center items-center p-4 md:p-10">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-black flex justify-center items-center p-4 md:p-10">
 
-      <div className="backdrop-blur-lg bg-white/70 border border-white/30 p-6 md:p-10 rounded-3xl shadow-2xl w-full max-w-2xl">
+      <div className="w-full max-w-3xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] shadow-2xl p-6 md:p-12">
 
         {/* HEADER */}
 
         <div className="text-center mb-12">
 
-          <h1 className="text-4xl md:text-7xl font-extrabold text-gray-800 mb-4">
+          <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4">
 
             Add Transaction
 
           </h1>
 
-          <p className="text-lg md:text-2xl text-gray-600">
+          <p className="text-gray-300 text-lg md:text-2xl">
 
             Track your income and expenses
 
@@ -309,7 +315,7 @@ function AddTransaction() {
           <div className="relative">
 
             <FaMoneyBillWave
-              className="absolute left-6 top-6 text-green-500 text-2xl"
+              className="absolute left-6 top-6 text-green-400 text-2xl"
             />
 
             <input
@@ -318,7 +324,7 @@ function AddTransaction() {
               placeholder="Enter Amount"
               value={formData.amount}
               onChange={handleChange}
-              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-green-300 text-xl md:text-2xl"
+              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-green-400 text-xl"
               required
             />
 
@@ -329,7 +335,7 @@ function AddTransaction() {
           <div className="relative">
 
             <FaAlignLeft
-              className="absolute left-6 top-6 text-blue-500 text-2xl"
+              className="absolute left-6 top-6 text-blue-400 text-2xl"
             />
 
             <input
@@ -338,7 +344,7 @@ function AddTransaction() {
               placeholder="Enter Description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-300 text-xl md:text-2xl"
+              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-400 text-xl"
               required
             />
 
@@ -350,19 +356,28 @@ function AddTransaction() {
             name="type"
             value={formData.type}
             onChange={handleChange}
-            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-indigo-300 text-xl md:text-2xl"
+            className="w-full p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-indigo-400 text-xl"
             required
           >
 
-            <option value="">
+            <option
+              value=""
+              className="text-black"
+            >
               Select Type
             </option>
 
-            <option value="INCOME">
+            <option
+              value="INCOME"
+              className="text-black"
+            >
               INCOME
             </option>
 
-            <option value="EXPENSE">
+            <option
+              value="EXPENSE"
+              className="text-black"
+            >
               EXPENSE
             </option>
 
@@ -370,54 +385,69 @@ function AddTransaction() {
 
           {/* CATEGORY */}
 
-          <select
-            name="category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-purple-300 text-xl md:text-2xl"
-            required
-          >
+          <div className="relative">
 
-            <option value="">
-              Select Category
-            </option>
+            <FaTags
+              className="absolute left-6 top-6 text-purple-400 text-2xl z-10"
+            />
 
-            {
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-purple-400 text-xl"
+              required
+            >
 
-              filteredCategories.length === 0 ? (
+              <option
+                value=""
+                className="text-black"
+              >
+                Select Category
+              </option>
 
-                <option disabled>
+              {
 
-                  No Categories Available
+                filteredCategories.length > 0 ? (
 
-                </option>
+                  filteredCategories.map(
+                    (cat) => (
 
-              ) : (
+                      <option
+                        key={cat.id}
+                        value={cat.name}
+                        className="text-black"
+                      >
 
-                filteredCategories.map(
-                  (cat) => (
+                        {cat.name}
 
-                    <option
-                      key={cat.id}
-                      value={cat.name}
-                    >
-
-                      {cat.name}
-
-                    </option>
+                      </option>
+                    )
                   )
-                )
-              )
-            }
 
-          </select>
+                ) : (
+
+                  <option
+                    disabled
+                    className="text-black"
+                  >
+
+                    No Categories Available
+
+                  </option>
+                )
+              }
+
+            </select>
+
+          </div>
 
           {/* DATE */}
 
           <div className="relative">
 
             <FaCalendarAlt
-              className="absolute left-6 top-6 text-red-500 text-2xl"
+              className="absolute left-6 top-6 text-red-400 text-2xl"
             />
 
             <input
@@ -426,7 +456,7 @@ function AddTransaction() {
               value={formData.date}
               onChange={handleChange}
               max={maxDate}
-              className="w-full pl-16 p-5 rounded-3xl border border-gray-300 focus:outline-none focus:ring-4 focus:ring-red-300 text-xl md:text-2xl"
+              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-red-400 text-xl"
               required
             />
 
@@ -437,12 +467,12 @@ function AddTransaction() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-5 rounded-3xl text-2xl md:text-3xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 text-white p-5 rounded-3xl text-2xl font-bold hover:scale-105 transition duration-300 shadow-2xl disabled:opacity-60"
           >
 
             {
               loading
-                ? "Adding..."
+                ? "Adding Transaction..."
                 : "Add Transaction"
             }
 
