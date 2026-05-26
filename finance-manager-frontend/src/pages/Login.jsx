@@ -52,23 +52,37 @@ function Login() {
           formData
         );
 
-      alert(response.data.message);
+      console.log(response.data);
 
-      localStorage.setItem(
+      if (
+        response.data.message ===
+        "Login successful"
+      ) {
 
-        "token",
+        localStorage.setItem(
 
-        response.data.token
-      );
+          "token",
 
-      localStorage.setItem(
+          response.data.token || "SUCCESS"
+        );
 
-        "username",
+        localStorage.setItem(
 
-        formData.username
-      );
+          "username",
 
-      navigate("/");
+          formData.username
+        );
+
+        alert("Login Successful");
+
+        navigate("/");
+
+      } else {
+
+        alert(
+          response.data.message
+        );
+      }
 
     } catch (error) {
 
@@ -179,7 +193,7 @@ function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl text-xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60"
+            className="w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white p-4 rounded-2xl text-xl font-bold hover:scale-105 transition duration-300 shadow-xl disabled:opacity-60 disabled:cursor-not-allowed"
           >
 
             {
