@@ -1,19 +1,14 @@
 package com.anvesh.finance_manager.controller;
 
 import com.anvesh.finance_manager.dto.ReportResponse;
-
 import com.anvesh.finance_manager.entity.Transaction;
-
 import com.anvesh.finance_manager.service.TransactionService;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-
 import java.util.List;
-
 import java.util.Map;
 
 @RestController
@@ -28,24 +23,19 @@ public class ReportController {
 
     @GetMapping("/{username}")
     public Map<String, Object> getReport(
-
             @PathVariable String username
     ) {
 
         List<Transaction> transactions =
-
                 transactionService
-                        .getTransactionsByUsername(
-                                username
-                        );
+                        .getTransactionsByUsername(username);
 
         double income = 0;
-
         double expense = 0;
 
         for (Transaction t : transactions) {
 
-            if ("INCOME".equals(t.getType())) {
+            if ("INCOME".equalsIgnoreCase(t.getType())) {
 
                 income += t.getAmount();
 
@@ -58,20 +48,11 @@ public class ReportController {
         Map<String, Object> report =
                 new HashMap<>();
 
-        report.put(
-                "totalIncome",
-                income
-        );
+        report.put("totalIncome", income);
 
-        report.put(
-                "totalExpense",
-                expense
-        );
+        report.put("totalExpense", expense);
 
-        report.put(
-                "netSavings",
-                income - expense
-        );
+        report.put("netSavings", income - expense);
 
         return report;
     }
@@ -89,11 +70,8 @@ public class ReportController {
     ) {
 
         List<Transaction> transactions =
-
                 transactionService
-                        .getTransactionsByUsername(
-                                username
-                        );
+                        .getTransactionsByUsername(username);
 
         Map<String, Double> incomeByCategory =
                 new HashMap<>();
@@ -102,46 +80,68 @@ public class ReportController {
                 new HashMap<>();
 
         double totalIncome = 0;
-
         double totalExpense = 0;
 
         for (Transaction t : transactions) {
 
-            if (t.getDate() == null) {
+            if (t.getDate() == null ||
+                    t.getDate().isEmpty()) {
+
                 continue;
             }
 
-            if (t.getDate().getMonthValue() == month &&
-                    t.getDate().getYear() == year) {
+            try {
 
-                if ("INCOME".equals(t.getType())) {
+                String[] parts =
+                        t.getDate().split("-");
 
-                    totalIncome += t.getAmount();
+                int transactionYear =
+                        Integer.parseInt(parts[0]);
 
-                    incomeByCategory.put(
+                int transactionMonth =
+                        Integer.parseInt(parts[1]);
 
-                            t.getCategory(),
+                if (transactionMonth == month &&
+                        transactionYear == year) {
 
-                            incomeByCategory.getOrDefault(
-                                    t.getCategory(),
-                                    0.0
-                            ) + t.getAmount()
-                    );
+                    if ("INCOME".equalsIgnoreCase(
+                            t.getType()
+                    )) {
 
-                } else {
+                        totalIncome += t.getAmount();
 
-                    totalExpense += t.getAmount();
+                        incomeByCategory.put(
 
-                    expenseByCategory.put(
+                                t.getCategory(),
 
-                            t.getCategory(),
+                                incomeByCategory.getOrDefault(
+                                        t.getCategory(),
+                                        0.0
+                                ) + t.getAmount()
+                        );
 
-                            expenseByCategory.getOrDefault(
-                                    t.getCategory(),
-                                    0.0
-                            ) + t.getAmount()
-                    );
+                    } else {
+
+                        totalExpense += t.getAmount();
+
+                        expenseByCategory.put(
+
+                                t.getCategory(),
+
+                                expenseByCategory.getOrDefault(
+                                        t.getCategory(),
+                                        0.0
+                                ) + t.getAmount()
+                        );
+                    }
                 }
+
+            } catch (Exception e) {
+
+                System.out.println(
+                        "Invalid date format: "
+                                + t.getDate()
+                );
             }
         }
 
@@ -166,11 +166,8 @@ public class ReportController {
     ) {
 
         List<Transaction> transactions =
-
                 transactionService
-                        .getTransactionsByUsername(
-                                username
-                        );
+                        .getTransactionsByUsername(username);
 
         Map<Integer, Double> monthlySavings =
                 new HashMap<>();
@@ -182,36 +179,58 @@ public class ReportController {
 
         for (Transaction t : transactions) {
 
-            if (t.getDate() == null) {
+            if (t.getDate() == null ||
+                    t.getDate().isEmpty()) {
+
                 continue;
             }
 
-            if (t.getDate().getYear() == year) {
+            try {
 
-                int month =
-                        t.getDate().getMonthValue();
+                String[] parts =
+                        t.getDate().split("-");
 
-                double current =
-                        monthlySavings.get(month);
+                int transactionYear =
+                        Integer.parseInt(parts[0]);
 
-                if ("INCOME".equals(t.getType())) {
+                int transactionMonth =
+                        Integer.parseInt(parts[1]);
 
-                    monthlySavings.put(
+                if (transactionYear == year) {
 
-                            month,
+                    double current =
+                            monthlySavings.get(
+                                    transactionMonth
+                            );
 
-                            current + t.getAmount()
-                    );
+                    if ("INCOME".equalsIgnoreCase(
+                            t.getType()
+                    )) {
 
-                } else {
+                        monthlySavings.put(
 
-                    monthlySavings.put(
+                                transactionMonth,
 
-                            month,
+                                current + t.getAmount()
+                        );
 
-                            current - t.getAmount()
-                    );
+                    } else {
+
+                        monthlySavings.put(
+
+                                transactionMonth,
+
+                                current - t.getAmount()
+                        );
+                    }
                 }
+
+            } catch (Exception e) {
+
+                System.out.println(
+                        "Invalid date format: "
+                                + t.getDate()
+                );
             }
         }
 
