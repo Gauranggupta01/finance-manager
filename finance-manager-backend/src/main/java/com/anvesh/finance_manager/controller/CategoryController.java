@@ -11,16 +11,25 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+
 @RequestMapping("/api/categories")
-@CrossOrigin(origins = "*")
+
+@CrossOrigin(
+        origins = {
+            "http://localhost:5173",
+            "https://finance-manager-1-ps23.onrender.com"
+        }
+)
+
 public class CategoryController {
 
     @Autowired
     private CategoryService categoryService;
 
-    // GET CATEGORIES
+    // GET ALL CATEGORIES OF USER
 
     @GetMapping("/{username}")
+
     public List<Category> getCategories(
 
             @PathVariable String username
@@ -34,6 +43,7 @@ public class CategoryController {
     // CREATE CATEGORY
 
     @PostMapping
+
     public Category createCategory(
 
             @RequestBody Category category
@@ -47,6 +57,7 @@ public class CategoryController {
     // DELETE CATEGORY
 
     @DeleteMapping("/{id}")
+
     public String deleteCategory(
 
             @PathVariable Long id
@@ -54,6 +65,6 @@ public class CategoryController {
 
         categoryService.deleteCategory(id);
 
-        return "Category Deleted";
+        return "Category Deleted Successfully";
     }
 }
