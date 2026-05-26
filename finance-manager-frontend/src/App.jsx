@@ -30,9 +30,7 @@ function App() {
 
     <BrowserRouter>
 
-      {
-        token && <Navbar />
-      }
+      <Navbar />
 
       <Routes>
 
@@ -40,20 +38,12 @@ function App() {
 
         <Route
           path="/login"
-          element={
-            token
-              ? <Navigate to="/" />
-              : <Login />
-          }
+          element={<Login />}
         />
 
         <Route
           path="/register"
-          element={
-            token
-              ? <Navigate to="/" />
-              : <Register />
-          }
+          element={<Register />}
         />
 
         {/* PROTECTED ROUTES */}
@@ -102,7 +92,7 @@ function App() {
           }
         />
 
-        {/* FALLBACK */}
+        {/* DEFAULT */}
 
         <Route
           path="*"
