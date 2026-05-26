@@ -1,29 +1,22 @@
-import { useState } from "react";
-
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 import API from "../services/api";
+
+import { useNavigate } from "react-router-dom";
 
 import {
   FaMoneyBillWave,
   FaAlignLeft,
-  FaCalendarAlt,
   FaTags,
+  FaCalendarAlt,
 } from "react-icons/fa";
 
 function AddTransaction() {
 
   const navigate = useNavigate();
 
-  const today = new Date();
-
-  today.setMinutes(
-    today.getMinutes() -
-    today.getTimezoneOffset()
-  );
-
-  const maxDate =
-    today.toISOString().split("T")[0];
+  const username =
+    localStorage.getItem("username");
 
   const [loading, setLoading] =
     useState(false);
@@ -39,10 +32,10 @@ function AddTransaction() {
 
       category: "Salary",
 
-      date: maxDate,
-    });
+      date: "",
 
-  // STATIC CATEGORIES
+      username: username,
+    });
 
   const categories = {
 
@@ -57,6 +50,8 @@ function AddTransaction() {
       "Investment",
 
       "Bonus",
+
+      "Other Income",
     ],
 
     EXPENSE: [
@@ -65,89 +60,68 @@ function AddTransaction() {
 
       "Rent",
 
-      "Transportation",
+      "Transport",
 
-      "Entertainment",
+      "Shopping",
 
       "Healthcare",
 
-      "Utilities",
+      "Entertainment",
 
-      "Shopping",
+      "Bills",
+
+      "Other Expense",
     ],
   };
 
-  // HANDLE INPUT
+  useEffect(() => {
+
+    setFormData((prev) => ({
+
+      ...prev,
+
+      category:
+        categories[
+          prev.type
+        ][0],
+    }));
+
+  }, [formData.type]);
 
   const handleChange = (e) => {
-
-    const { name, value } =
-      e.target;
-
-    // TYPE CHANGE
-
-    if (name === "type") {
-
-      setFormData({
-
-        ...formData,
-
-        type: value,
-
-        category:
-          categories[value][0],
-      });
-
-      return;
-    }
 
     setFormData({
 
       ...formData,
 
-      [name]: value,
+      [e.target.name]:
+        e.target.value,
     });
   };
-
-  // SUBMIT FORM
 
   const handleSubmit = async (e) => {
 
     e.preventDefault();
 
+    setLoading(true);
+
     try {
 
-      setLoading(true);
-
-      const username =
-        localStorage.getItem(
-          "username"
-        );
-
-      if (!username) {
-
-        alert(
-          "Please Login Again"
-        );
-
-        navigate("/login");
-
-        return;
-      }
-
-      const transactionData = {
+      const payload = {
 
         amount:
-          Number(formData.amount),
+          Number(
+            formData.amount
+          ),
 
         description:
           formData.description,
 
-        category:
-          formData.category,
-
         type:
           formData.type,
+
+        category:
+          formData.category,
 
         date:
           formData.date,
@@ -157,8 +131,8 @@ function AddTransaction() {
       };
 
       console.log(
-        "SENDING:",
-        transactionData
+        "Sending Data:",
+        payload
       );
 
       const response =
@@ -166,11 +140,11 @@ function AddTransaction() {
 
           "/transactions",
 
-          transactionData
+          payload
         );
 
       console.log(
-        "SUCCESS:",
+        "Response:",
         response.data
       );
 
@@ -178,45 +152,15 @@ function AddTransaction() {
         "Transaction Added Successfully"
       );
 
-      // RESET FORM
-
-      setFormData({
-
-        amount: "",
-
-        description: "",
-
-        type: "INCOME",
-
-        category: "Salary",
-
-        date: maxDate,
-      });
-
-      // REDIRECT
-
       navigate("/transactions");
 
     } catch (error) {
 
       console.log(error);
 
-      if (error.response) {
-
-        console.log(
-          error.response.data
-        );
-
-        alert(
-          "Backend Error"
-        );
-
-      } else {
-
-        alert(
-          "Failed To Add Transaction"
-        );
-      }
+      alert(
+        "Failed To Add Transaction"
+      );
 
     } finally {
 
@@ -224,23 +168,28 @@ function AddTransaction() {
     }
   };
 
+  const maxDate =
+    new Date()
+      .toISOString()
+      .split("T")[0];
+
   return (
 
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-950 to-black flex justify-center items-center p-4 md:p-10">
+    <div className="min-h-screen bg-gradient-to-r from-[#0f172a] via-[#16235c] to-black flex justify-center items-center px-4 py-10">
 
-      <div className="w-full max-w-3xl bg-white/10 backdrop-blur-xl border border-white/20 rounded-[40px] shadow-2xl p-6 md:p-12">
+      <div className="w-full max-w-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-[40px] p-8 md:p-10">
 
         {/* HEADER */}
 
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
 
-          <h1 className="text-5xl md:text-7xl font-extrabold text-white mb-4">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-white mb-3">
 
             Add Transaction
 
           </h1>
 
-          <p className="text-gray-300 text-lg md:text-2xl">
+          <p className="text-gray-300 text-xl">
 
             Track your income and expenses
 
@@ -252,7 +201,7 @@ function AddTransaction() {
 
         <form
           onSubmit={handleSubmit}
-          className="space-y-8"
+          className="space-y-6"
         >
 
           {/* AMOUNT */}
@@ -260,7 +209,7 @@ function AddTransaction() {
           <div className="relative">
 
             <FaMoneyBillWave
-              className="absolute left-6 top-6 text-green-400 text-2xl"
+              className="absolute left-5 top-5 text-green-400 text-xl"
             />
 
             <input
@@ -269,7 +218,7 @@ function AddTransaction() {
               placeholder="Enter Amount"
               value={formData.amount}
               onChange={handleChange}
-              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-green-400 text-xl"
+              className="w-full pl-14 p-5 rounded-3xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-green-400 text-xl"
               required
             />
 
@@ -280,7 +229,7 @@ function AddTransaction() {
           <div className="relative">
 
             <FaAlignLeft
-              className="absolute left-6 top-6 text-blue-400 text-2xl"
+              className="absolute left-5 top-5 text-blue-400 text-xl"
             />
 
             <input
@@ -289,7 +238,7 @@ function AddTransaction() {
               placeholder="Enter Description"
               value={formData.description}
               onChange={handleChange}
-              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-400 text-xl"
+              className="w-full pl-14 p-5 rounded-3xl bg-white/10 border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:ring-4 focus:ring-blue-400 text-xl"
               required
             />
 
@@ -329,14 +278,14 @@ function AddTransaction() {
           <div className="relative">
 
             <FaTags
-              className="absolute left-6 top-6 text-purple-400 text-2xl z-10"
+              className="absolute left-5 top-5 text-purple-400 text-xl z-10"
             />
 
             <select
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-purple-400 text-xl"
+              className="w-full pl-14 p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-purple-400 text-xl"
             >
 
               {
@@ -344,7 +293,10 @@ function AddTransaction() {
                 categories[
                   formData.type
                 ].map(
-                  (category, index) => (
+                  (
+                    category,
+                    index
+                  ) => (
 
                     <option
                       key={index}
@@ -368,7 +320,7 @@ function AddTransaction() {
           <div className="relative">
 
             <FaCalendarAlt
-              className="absolute left-6 top-6 text-red-400 text-2xl"
+              className="absolute left-5 top-5 text-red-400 text-xl"
             />
 
             <input
@@ -377,7 +329,7 @@ function AddTransaction() {
               value={formData.date}
               onChange={handleChange}
               max={maxDate}
-              className="w-full pl-16 p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-red-400 text-xl"
+              className="w-full pl-14 p-5 rounded-3xl bg-white/10 border border-white/20 text-white focus:outline-none focus:ring-4 focus:ring-red-400 text-xl"
               required
             />
 
@@ -392,6 +344,7 @@ function AddTransaction() {
           >
 
             {
+
               loading
                 ? "Adding Transaction..."
                 : "Add Transaction"
