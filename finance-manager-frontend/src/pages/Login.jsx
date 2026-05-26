@@ -55,8 +55,10 @@ function Login() {
       console.log(response.data);
 
       if (
-        response.data.message ===
-        "Login successful"
+        response.data.message &&
+        response.data.message
+          .toLowerCase()
+          .includes("success")
       ) {
 
         localStorage.setItem(
@@ -75,12 +77,13 @@ function Login() {
 
         alert("Login Successful");
 
-        navigate("/");
+        window.location.href = "/";
 
       } else {
 
         alert(
-          response.data.message
+          response.data.message ||
+          "Login Failed"
         );
       }
 
