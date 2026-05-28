@@ -1,4 +1,4 @@
-# Finance Manager 💰
+# Finance Manager - Java💰
 
 A full stack Finance Management web application built to manage daily income and expenses with beautiful analytics and reports.
 
